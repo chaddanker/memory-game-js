@@ -1,4 +1,5 @@
 let gameSettings = {
+	animationSpeed: 2,
 	tileColor: {
 		normal: 'rgb(255, 81, 0)',
 		flipped: 'white',
@@ -25,6 +26,7 @@ let gameSettings = {
 };
 
 const shuffledIcons = shuffle(gameSettings.icons);
+const { animationSpeed } = gameSettings;
 let current = -1;
 let prev = -1;
 let touched = false;
@@ -57,28 +59,37 @@ function init(tiles) {
 };
 
 function _onClick(event, i) {
+	// if tile is clicked twice, return
 	if(!touched) { // first time touched
 		touched = true; 
 		startTimer();
 	}
 	const { target } = event;
+
 	prev = current === -1 ? -1 : current;
 	current = i;
+	if(matches.indexOf(current) !== -1) {
+		return;
+	}
 	flip(target, i);
-	if(isMatch(prev, current)) {
+	if(
+		isMatch(prev, current) 
+		&& matches.indexOf(prev) === -1
+		&& matches.indexOf(current) === -1
+		&& prev !== current
+	) {
 		matches = [...matches, prev, current];
-		console.log(matches);
+
 		setTimeout(() => {
 			matches.map(match => {
 				if(document.querySelector(`.tile-${match}`).innerHTML === '') {
 					flip(document.querySelector(`.tile-${match}`), match);
 				}
 			});
-		}, 1200);
-		matches.length === gameSettings.icons.length ? stopTimer() : null;
+		}, 1200 / animationSpeed);
+		matches.length === gameSettings.icons.length ? endGame() : null;
 		return;
 	}
-
 	flipBack(target);
 }
 
@@ -87,7 +98,7 @@ function flip(target, i) {
 	target.style.backgroundColor = gameSettings.tileColor.flipped;
 	setTimeout(() => {
 		target.innerHTML = `<i class="ui icon huge ${shuffledIcons[i]}"></i>`;
-	}, 200); 
+	}, 200 / animationSpeed); 
 }
 
 function flipBack(target) {
@@ -96,8 +107,8 @@ function flipBack(target) {
 		target.style.backgroundColor = gameSettings.tileColor.normal;
 		setTimeout(() => {
 			target.innerHTML = '';
-		}, 150);
-	}, 1213);	
+		}, 150 / animationSpeed);
+	}, 1213 / animationSpeed);	
 }
 
 function shuffle(array) {
@@ -117,4 +128,34 @@ function startTimer() {
 
 function stopTimer() {
 	clearInterval(gameTimeId);
+}
+
+function endGame() {
+	stopTimer();
+	postScore();
+}
+
+const postScore = () => {
+	const postScoreQuery = `
+						mutation {
+							newscore(
+							email: "chaddanker@gmail.com",
+							score: ${Number(gameTime)},
+							name: "Chad Danker"
+							) {
+								id
+							}
+						}`;
+	const options = {
+		method: "post",
+		headers: {
+		  "Content-Type": "application/json"
+		},
+		body: JSON.stringify({
+		  query: postScoreQuery
+		})
+	};
+
+	fetch(`http://localhost:4000`, options)
+	.then(res => res.json());
 }

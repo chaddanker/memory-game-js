@@ -9,8 +9,8 @@ body {
 }
 
 .tile-container {
-	width: 360px;
-	margin: 5em auto;
+	width: 270px;
+	margin: 1em auto;
 	overflow: visible;
 }
 
@@ -22,14 +22,11 @@ body {
 	float: left;
 	border-radius: 5%;
 	overflow: inherit;
+	cursor: pointer;
 }
 
 .tile-container > .tile > .ui.icon {
 	padding: 10px 0;
-}
-
-.ui.icon.apple {
-	z-index: -99;
 }
 
 .rotated {
@@ -39,5 +36,31 @@ body {
 #time {
 	color: #ffffff;
 	font-size: 5em;
-	margin: 5em auto !important;
+	margin: 1em auto !important;
+}
+
+.modal-background {
+	width: 100vw;
+	height: 100vh;
+	background: #00000010;
+	position: absolute;
+	z-index: 999;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	text-align: center;
+}
+
+
+.modal {
+	width: 350px;
+	height: 80vh;
+	margin: 10vh auto;
+	text-align: inherit;
+}
+
+.modal > input {
+	width: 90%;
+	margin: 1em auto;
 }

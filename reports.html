@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Memory Game JS</title>
+		<link rel="stylesheet" type="text/css" href="assets/css/style.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" integrity="sha512-8bHTC73gkZ7rZ7vpqUQThUDhqcNFyYi2xgDgPDHc+GXVGHXq+xPjynxIopALmOPqzo9JZj0k6OqqewdGO3EsrQ==" crossorigin="anonymous" />
+        <style>
+            body {
+                text-align: center;
+            }
+
+            svg {
+                margin: 2em auto;
+            }
+
+            ul {
+                width: 350px;
+            }
+
+            li {
+                text-align: left;
+                list-style-type: none;
+                height: 25px;
+                font-size: 16px;
+                margin: 5px;
+                background-color: white;
+                padding-left: 1em;
+            }
+        </style>
+    </head>
+	<body>
+        <h1>Leaderboard</h1>
+
+    </body>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script type="text/javascript" >
+        function getScores() {
+            const getScores = `
+                                query {
+                                    scorelist {
+                                        count
+                                        scores {
+                                            name
+                                            score
+                                        }
+                                    }
+                                }`;
+            const options = {
+                method: "post",
+                headers: {
+                "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                query: getScores
+                })
+            };
+
+            fetch(`http://localhost:4000`, options)
+            .then(res => res.json())
+            .then(res => drawGraph(res.data.scorelist));
+        }
+
+        getScores();
+
+        function drawGraph({ scores, count }) {
+            // categorize in 10s, 
+            let categories = {};
+            scores.map(({score}) => {
+                console.log(score);
+                switch(true) {
+                    case score > 0 && score < 10: { 
+                        categories['0s'] ? categories['0s'] += 1 : categories['0s'] = 1; 
+                        break; 
+                    }
+                    case score >= 10 && score < 20: { 
+                        categories['10s'] ? categories['10s'] += 1 : categories['10s'] = 1; 
+                        break; 
+                    }
+                    case score >= 20 && score < 30: { 
+                        categories['20s'] ? categories['20s'] += 1 : categories['20s'] = 1; 
+                        break; 
+                    }
+                    case score >= 30 && score < 40: { 
+                        categories['30s'] ? categories['30s'] += 1 : categories['30s'] = 1; 
+                        break; 
+                    }
+                    case score >= 40 && score < 50: { 
+                        categories['40s'] ? categories['40s'] += 1 : categories['40s'] = 1; 
+                        break; 
+                    }
+                    case score >= 50 && score < 60: { 
+                        categories['50s'] ? categories['50s'] += 1 : categories['50s'] = 1; 
+                        break; 
+                    }
+                    case score >= 60 && score < 70: { 
+                        categories['60s'] ? categories['60s'] += 1 : categories['60s'] = 1; 
+                        break; 
+                    }
+                    case score >= 70 && score < 80: { 
+                        categories['70s'] ? categories['70s'] += 1 : categories['70s'] = 1; 
+                        break; 
+                    }
+                    case score >= 80 && score < 90: { 
+                        categories['80s'] ? categories['80s'] += 1 : categories['80s'] = 1; 
+                        break; 
+                    }
+                    case score >= 90 && score < 100: { 
+                        categories['90s'] ? categories['90s'] += 1 : categories['90s'] = 1; 
+                        break; 
+                    }   
+                    case score >= 100: { 
+                        categories['100+'] ? categories['100+'] += 1 : categories['100+'] = 1; 
+                        break; 
+                    }                           
+                }
+            });
+
+            const keys = Object.keys(categories)
+            .sort();
+            const dataset = keys.map(key => {
+                return categories[key];
+            });
+            const w = 500;
+            const h = 120;
+
+            const sortedScores = scores.sort((a, b) => a.score - b.score);
+
+            const ul = d3.select("body")
+                .append("ul")
+                .selectAll("li")
+                .data(sortedScores)
+                .enter()
+                .append("li")
+                .text((d, i) => `${i + 1}.   ${d.score}s  ${d.name}`)
+
+            const svg = d3.select("body")
+                .append("svg")
+                .attr("width", w)
+                .attr("height", h);
+
+            svg.selectAll("rect")
+                .data(dataset)
+                .enter()
+                .append("rect")
+                .attr("x", (d, i) => 30 * i)
+                .attr("y", (d, i) => h - (10 * d))
+                .attr("height", (d, i) => (50 * d))
+                .attr("width", 25)
+                .attr("fill", "white");
+
+            svg.selectAll("text")
+                .data(dataset)
+                .enter()       
+                .append("text")
+                .attr("x", (d, i) => 30 * i)
+                .attr("y", (d, i) => h - (10 * d) - 3)
+                .style("font-size", "9px")
+                .text((d, i) => d);
+        }
+
+
+    </script>
+</html>
